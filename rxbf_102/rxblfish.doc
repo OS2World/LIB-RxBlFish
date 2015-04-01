@@ -1,0 +1,176 @@
+25 Feb 2003.    Michal Necasek  (MichalN@scitechsoft.com)
+                Daniel Hellerstein (danielh@crosslink.net)
+
+        RxBlFish ver 1.02: An OS/2 REXX interface to BlowFish
+
+Summary:
+   BlowFish is a very powerful encryption tool.  RxBlFish provides 
+   an OS/2 REXX interfact to BlowFish -- with RxBlFish, you can
+   use REXX to encrypt strings and files.
+
+                        ---------------------------
+
+NOTE: This is an update version 1.01 (released in 1999) -- it fixes
+     a serious bug that occurs when changing keys under a single process.
+
+
+I. Requirements
+
+To use RxBlFish, you must have version 1.62 (or above) of BlowFish for OS/2.
+In particular, you need ENCRYPT.DLL  from  version 1.62 (or above).
+
+Due to U.S. export regulations, we can not include ENCRYPT.DLL in this
+distribution. You'll have to obtain it yourself.
+
+     U.S. users can find BlowFish for OS/2 on hobbes (http://www.hobbes.nmsu, search
+     for Blowfish).
+     Non U.S. users can find BlowFish for OS/2 on a variety of other
+     sites, including:
+       http://www.mirror.ac.uk/sites/hobbes.nmsu.edu/pub/os2/util/encrypt/bfish163.zip
+     and
+       ftp://ftp.flashnet.it/pub/hobbes.nmsu.edu/pub/os2/util/encrypt/bfish163.zip
+
+                        ---------------------------
+II. Installation
+
+a) Unzip RXBLFISH.ZIP to an empty temporary directory.
+b) Obtain the latest version of the BlowFish (for OS/2) ENCRYPT.DLL
+   (say, by obtaining bfish163.zip and unzipping bfish163 to an empty
+   temporary directory)
+c) Copy RXBLFISH.DLL and ENCRYPT.DLL to a directory in your LIBPATH.
+   For example, to x:\OS2\DLL (where x: is your boot drive).
+  
+That's it -- except for writing a REXX program that calls the procedures
+in RXBLFISH... as described below.
+  
+                        ---------------------------
+III. Usage
+
+RXBLFISH contains the following procedures:
+   rxBfGetVersion   Get the "version number"
+   rxBfSetVeration  Set the "version number"
+   rxBfInitialise   Initialise an encryption key
+   rxBfEncrypt      Encrypt a string or a file
+   rxBfDecrypt      Decrypt a string or a file
+
+To load these functions, you can use:
+
+   call RxFuncAdd 'rxBfGetVersion', 'RXBLFISH', 'rxBfGetVersion'
+   call RxFuncAdd 'rxBfSetVersion', 'RXBLFISH', 'rxBfSetVersion'
+   call RxFuncAdd 'rxBfInitialise', 'RXBLFISH', 'rxBfInitialise'
+   call RxFuncAdd 'rxBfEncrypt',    'RXBLFISH', 'rxBfEncrypt'
+   call RxFuncAdd 'rxBfDecrypt',    'RXBLFISH', 'rxBfDecrypt'
+
+  Note that you MUST have ENCRYPT.DLL in LIBPATH (or in the
+  default directory)-- these RXBLFISH procedures call procedures in 
+  ENCRYPT.DLL, but they do NOT elegantly detect if ENCRYPT.DLL
+  is not available.
+
+Before using rxBfEncrypt or rxBfDecrypt, you must "initialise"
+a key (using rxBfInitialise).
+
+III.a Description of procedures
+
+rxBfSetVersion:  Set the "version number"
+  Syntax:  
+     status=rxBfSetVersion(nn)  
+  Sets the "version number".
+  A non-zero return value indicates an error.
+
+rxBfGetVersion:  Get the "version number"
+  Syntax:  
+     status=rxBfSetVersion(nn)  
+  Gets the "version number" (as was set by rxBfSetVersion)
+  
+
+
+rxBfInitialise: Initialise a key
+  Syntax:  
+     status=rxBfInitialise(keyvalue)
+  where
+     keyvalue: a string containing an encryption key.
+
+  For  example:
+     call rxBfInitialise('the key')
+
+  Note that this string can be of any length (though it has not
+  been tested with strings greater then 80 characters long).
+ 
+ 
+rxBfEncrypt:      Encrypt a string or a file
+  Syntax:
+      enc_stuff=rxBfEncrypt(file_or_string[,fileflag])
+  where:
+     fileflag is optional. 
+        fileflag=1 : file_or_string is interpreted as a file name. 
+                     The file will be encrypted, with results saved
+                     back to file_or_string. That is, the file specified
+                     in file_or_string will be overwritten.
+                     A non-zero value of enc_stuff signal an error.
+        fileflag=a file name (relative or fully qualified),
+                    The encrypted results are written to fileflag. 
+                    Thus, the file specified in file_or_string will NOT
+                    be overwritten.
+                    A non-zero value of enc_stuff signal an error.
+        If fileflag is not specified
+                    File_or_string  is used as is, with results 
+                    returned (to enc_stuff).
+ 
+   Examples:
+      encstring = rxBfEncrypt("This is a test string to demo Blowfish encryption.")
+      encstring = rxBfEncrypt('foobar.txt',1)
+      status = rxBfEncrypt('foobar.txt','foobar.enc')
+
+   Note that you MUST call rxBfInitialise before calling rxBfEncrypt.     
+
+rxBfDecrypt:      Decrypt a string or a file
+  Syntax:
+      dec_stuff=rxBfDecrypt(file_or_string[,fileflag])
+  where:
+     fileflag is optional. 
+        fileflag=1 : file_or_string is interpreted as a file name. 
+                     The file will be decrypted, with results saved
+                     back to file_or_string. That is, the file specified
+                     in file_or_string will be overwritten.
+        fileflag=a file name (relative or fully qualified),
+                    The decrypted results are written to fileflag. 
+                    Thus, the file specified in file_or_string will NOT
+                    be overwritten.
+                    A non-zero value of enc_stuff signal an error.
+        If fileflag is not specified
+                    File_or_string  is used as is, with results 
+                    returned (to dec_stuff).
+
+                        ---------------------------
+IV. Example
+
+
+call rxBfSetVersion(162)
+say  rxBfGetVersion()
+
+call rxBfInitialise('the key')
+
+rc = rxBfEncrypt("This is a test string to show that the Blowfish encryption really works.")
+say rc
+
+rc = rxBfDecrypt(rc)
+say "rxBFDecrypt status: " rc
+
+rc = rxBfEncrypt('test.txt', 1)
+say "rxBFEncrypt (of test.txt) status:" rc
+rc = rxBfDecrypt('test.txt', 1)
+say "rxBfDecrypt (of test.txt) status: " rc
+
+rc = rxBfEncrypt('test.txt', 'test.enc')
+say "Encrypt test.txt to test.enc, status=" rc
+rc = rxBfDecrypt('test.enc', 'test.dec')
+say "Decrypt test.enc, save results in test.dec. Status=" rc
+
+                        ---------------------------
+
+V. Possible future changes
+  
+  * support for compression
+  * a load procedure 
+
+

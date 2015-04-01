@@ -1,0 +1,96 @@
+Change History for BLOWFISH.EXE
+===============================
+
+Version    Date       Change
+-------  --------   ---------------------------------------------------------
+1.00     16-06-94   Initial release
+
+1.10     17-06-94   Added key validation.  The key is tested for correctness,
+                      and if it is wrong, decryption is not done.
+                    Added buffering of I/O.
+
+1.11     20-06-94   Fixed problem with source files shorter than header.
+
+1.12     22-06-94   Minor performance improvement through fewer memcpy()'s
+
+1.20     22-06-94   Added block chaining and double encryption, for much
+                    greater security(!)
+
+1.21     29-06-94   Performance tuning - improved speed by 90% (!)
+                    - changed F() to use union instead of mask/shift
+                    - unrolled loop in encrypt() / decrypt()
+                    - Compiled with full optimisation
+                    - Optimised for 486
+
+1.22     30-06-94   Added progress meter (% complete)
+                    Instead of storing key, store encrypted checksum of
+                      double-encrypted key (!).
+
+1.30     31-07-95   Added file replacement, if target not specified.
+                    Also handle ctrl-break and terminate cleanly.
+
+1.40     15-08-95   Added interactive mode - prompt for input, masked
+                      password, if no/insufficient parameters passed.
+                    Added more comprehensive help.
+
+1.41     16-08-95   Create temporary file in same directory as target,
+                      so rename problems eliminated.
+                    Add error checking on file write, for disk full.
+
+1.42     18-08-95   Split into BLOWFISH.EXE plus ENCRYPT.DLL.
+                    Ship ENCRYPT.LIB, ENCRYPT.H so others can call it.
+                    Also ship BF.EXE (statically-linked version).
+                    Include SAMPLE.C, SAMPLE.EXE to show usage.
+
+1.43     21-08-95   Handle data block lengths which are not a multiple of 8.
+
+1.50     06-09-95   Implement new algorithm (as per DDJ Sept '95) - 15% faster!
+                    Add test for sufficient free disk space for target file.
+                    Maintain file date/time/attributes during encryption.
+                    Use better block-chaining algorithm - another 15% faster.
+
+1.51     27-09-95   Fixed stupid bug which generated invalid temporary filename
+                      if the source file is in the root directory.
+
+1.60á    06-01-97   Fixed minor weakness in block chaining algorithm.
+                    Added and documented possible return codes from executable.
+                    Added test for zero-length key.  Well spotted, Stefan!
+                    Complete rewrite as C++ encryptor object, switch from
+                      C-Set++ to VisualAge C++.
+                    Add support for _System linkage calls to encryption
+                      functions in DLL.  Thanks to Jeremy Mathers for this idea.
+                    Added support for wildcard filenames - encrypt multiple
+                      files, entire directories, etc.
+                    Added optional file compression.
+                    Added optional file overwrite (to DoD standards).
+                    Optimised for Pentium processor.
+
+1.60     03-03-97   Shipped correct encrypt.obj for static linking (D'OH!).
+                    Added confirmation of key in interactive mode.
+                    Fixed problem with opening the target when default taken
+                      in interactve mode (if you ever struck this one, you
+                      know what I'm talking about).
+                    Fixed cosmetic problem with help text for codepages other
+                      than 437.
+
+1.61     22-07-97   Fixed cosmetic bug: incorrect percentage complete shown
+                      when encrypting very large (30MB) files.  Thanks to Harry
+                      Bush for finding this problem.
+                    Fixed problem with generating target file name when source
+                      file has no extension.  Good catch, Bakuteh.
+                    Added -e and -d switches to force all files to be encrypted
+                      or decrypted, respectively.
+                    Added Windows NT/95 support (executable, static link only).
+
+1.62     09-01-98   Implemented pseudo-random (time-stamp based) initialisation
+                      of block chaining.
+                    Published some previously undocumented functions to allow
+                      programmers to better control block chaining functions.
+                    Added compress/decompress to programming library.
+                    Added check for decrypting files created with a later 
+                      version.
+
+1.63     13-01-98   Fixed backward compatibility problem with version 1.61: 
+                      files decrypted incorrectly (first 8 bytes) with 1.62.  
+                      Huge thanks to John Thompson for reporting this one.
+===============================================================================

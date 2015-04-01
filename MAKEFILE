@@ -1,0 +1,8 @@
+
+RxBlfish.dll:     rxblfish.obj  rxblfish.def
+         ILINK /NOFREE $*.obj,$*.dll,,REXX encrypt,$*.def;
+
+rxblfish.obj:     rxblfish.c
+         icc -c -Ge- -Gm+ -I..\lib $*.c
+
+

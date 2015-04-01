@@ -1,0 +1,5 @@
+This is a small file.
+It is meant to be used by the rxbftest.cmd program.
+This program (rxbftest.cmd) demonstrates how one
+can use RXBLFISH.DLL to encrypt and decrypt
+(all from the comforts of rexx os/2).

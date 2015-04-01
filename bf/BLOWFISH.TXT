@@ -1,0 +1,439 @@
+                         ษอออออออออออออออออออออออออออออป
+                         บ BLOWFISH for OS/2 and Win32 บ
+                         บ        Version 1.63         บ
+                         บ     January 13th, 1998      บ
+                         ศอออออออออออออออออออออออออออออผ
+
+This programme implements the Blowfish encryption algorithm, developed by
+Bruce Schneier, as originally documented in Dr. Dobb's Journal, April 1994,
+and revised in the September 1995 edition.  I have taken this algorithm and
+added an interface for fast, intelligent file encryption under OS/2 and
+32-bit versions of Windows.
+
+In keeping with the public-domain nature of the algorithm, this programme is
+freeware.  I developed it on my own time, purely out of technical interest,
+and I hope others will find it as useful as I do.  Please use and distribute
+it as widely as possible.  If you find it valuable, let me know. If you have
+any problems, questions, comments or suggestions, please e-mail me:
+
+    Matthew Spencer - msspenc@ibm.net
+
+ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+How to Use It.
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+
+[Note for Windows users: replace "BLOWFISH" with "BFW" in all the examples.]
+
+The programme has 2 modes - command-line or interactive.  In command-line mode,
+the you invoke it as follows:
+
+   BLOWFISH [options] SOURCEFILE [TARGETFILE] "This is the key"
+
+To use interactive mode, just type BLOWFISH, and you will be prompted for
+the names of the file(s), and the key.  You will also be asked to enter the
+key twice, for confirmation purposes.
+
+Note that:
+
+ - Keys are CASE SENSITIVE, and can be from 1 to 56 bytes in length.
+   Longer keys are truncated to 56 bytes.  Strictly speaking, the key can
+   contain any of the 256 ASCII characters, including NULLs and graphics
+   characters (if using the programming interface).  In practice, the key
+   is limited to whatever characters you can enter from the keyboard.
+
+ - Multi-word keys MUST be surrounded by double quotes (if passed on the
+   command line).  This is not required in interactive mode.
+
+ - The key is visible when you use command-line mode.  If you don't want
+   someone looking over your shoulder to see the key, then use interactive
+   mode (asterisks are displayed, instead of the key).
+
+ - The target file name is optional.  You can supply it, and a second,
+   encrypted  file will be created, and the original will be left untouched.
+   If you don't supply the target file name, the original file is REPLACED
+   by the encrypted file.
+
+ - A general note on version compatibilty (VERY IMPORTANT!):  Newer versions
+   (higher version numbers) of BLOWFISH will correctly handle files encrypted
+   with older versions.  However, the reverse is NOT TRUE.  Don't try decrypting
+   a file with verion 1.61, that has been encrypted with version 1.62.  It won't
+   work.  From version 1.62 onwards, BLOWFISH detects this and gives an error.
+   Use the "-r" switch (see below) to find out the encryption version of a file.
+
+ - Type "BLOWFISH -?" for more extensive help.
+
+To install the programme, put BLOWFISH.EXE in a directory in your PATH, and
+put ENCRYPT.DLL in a directory in your LIBPATH.
+
+Advanced Usage.
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+
+New with version 1.60 are a bunch of extra features:
+
+ - Wildcards are now supported for source and target filenames.  I have tried
+   to make the behaviour match what you would expect from OS/2 (or DOS, or
+   even UNIX) commands.  You use the usual '?' to match a single character,
+   or '*' to match multiple characters.  [Note to Windows users: version 1.61
+   does not support wildcards in target filenames, since the windows API does
+   not have an equivalent to OS/2's DosEditName().  You can still get the same
+   effect by copying the files first, then encrypting the copies.  I intend to
+   fix this in a future version.]
+
+   When wildcards are used in the target filename, then the rules used in say,
+   the OS/2 'copy' command are applied. For example:
+
+     blowfish c:\config.sys *.enc "the key"
+
+   will produce a new, encrypted file c:\config.enc, using the key "the key",
+   and leaving the original file c:\config.sys untouched.
+
+   Actually, this also illustrates a small difference in behaviour compared
+   to the copy command.  The command:
+
+     copy c:\config.sys *.enc
+
+   will put the file config.enc in the CURRENT DIRECTORY, whereas blowfish will
+   put it in the SAME DIRECTORY as the source file, UNLESS you specify a
+   directory for the target.  The reason for his is that I figured that this
+   is the most useful behaviour, especially when you start doing subdirectory
+   searches (see below).  If you really want the target to end up in the
+   current directory, then just do something like:
+
+     blowfish c:\config.sys .\*.enc "the key"
+
+   Hopefully, blowfish is also a little smarter than the OS/2 copy when
+   processing multiple files which expand to the same target name.  For
+   example, if you happend to also have a file named c:\config.bak, then
+   the command
+
+     copy c:\config.* *.enc
+
+   will first copy config.bak to config.enc, and then copy config.sys to
+   config.enc, happily overwriting the result of the first copy.
+
+   Blowfish on other the hand, detects this and does not process the 2nd
+   file, giving an error message.
+
+   Note that you can also use a directory as a source (or target) filename.
+   So, if you decide to invoke:
+
+     blowfish c:\os2 "the key"
+
+   you will encrypt every file in the c:\os2 directory.  Probably not a good
+   idea, but you can do it if you want.
+
+There are now also a number of optional switches which increase the
+functionality.  Note that switches can be placed anywhere on the command
+line, and that '-s' and '/s' can be used interchangeably.
+
+ -s : Search subdirectories for matching file names.  The search includes
+      the starting directory, if specified, or the current directory if not.
+
+ -o : Overwrite the original file, so it cannot be un-deleted.  This overwrite
+      is done to US Department of Defense standards, which entails overwriting
+      the file 3 times.  For those interested, the process requires first
+      writing every byte with a given pattern (I use 00110101), then writing
+      with the complementary pattern (11001010), then re-writing with a
+      different pattern again (10010111).  The intent is to cycle the magnetic
+      media enough times to hide any trace of the original data. (see Bruce
+      Schneier's Applied Cryptography, 2nd Ed, p. 229, for more details).
+
+ -q : Quiet mode.  Suppress all informational messages.  Error messages are
+      still displayed.
+
+ -v : Verbose mode.  Display lots of messages about the processing.  Useful for
+      debugging unexpected behaviour.
+
+ -h : Allows encryption / decryption of hidden or system files.  These are
+      skipped during normal processing.
+
+ -c : Compress the file, before encrypting.  The algorithm is as used in the
+      freeware "gzip" utility - similar to pkzip's 'deflate'.  The compression
+      is applied before encryption, and its effectiveness is highly dependent
+      on the source data.  Don't bother using it on already compressed files
+      like .zip or .jpg - it just slows it down.  On the other hand, many text
+      files, documents, spreadsheets, database files and the like respond very
+      well to compression.  Highly repetitive data like XXX.TXT (see below)
+      compresses extremely well (7900 bytes compresses to 76 bytes, including
+      the 20 byte header).  This switch is ignored during decryption, but if
+      decrypting files which have been compressed, then they are automatically
+      decompressed.
+
+ -i : Force interactive mode (see above).  This is the only way you can combine
+      using switches with the privacy of interactive mode.  For example:
+
+        blowfish -c -s -i
+
+      will prompt for source, target and key, then encrypt and compress matching
+      files, in the current or specified directory, and its subdirectories.
+
+Version 1.61 also has these additional switches:
+
+ -e : Force encryption - ignore files which are already encrypted.  The way I see
+      this working is as follows:  Say you have a subdirectory C:\DOCS, in which
+      you normally keep all files encrypted.  In the course of the day you decrypt
+      some of the files, in various subdirectories under DOCS.  Before you shut
+      down and go home, you want to make sure all the files are encrypted again.
+      The command:
+
+        blowfish c:\docs "the key" -s -e
+
+      will search through the DOCS directory (and subdirectories), find all the
+      files which are not encrypted, and encrypt them.  It won't touch any file
+      which is aready encrypted, so it's fast.
+
+ -d : Force decryption.  This is the complement of the "-e" switch.  It decrypts
+      any file which is encrypted, ignoring files which are already decrypted.
+
+Version 1.62 has this additional switch:
+
+ -r : Report file header information: Show the original file size, Encryption
+      version used, and other interesting stuff.
+
+ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+Technical Stuff.
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+
+Blowfish is a new(ish) algorithm, optimised for 32-bit processors, and it is
+extremely fast. It is also (theoretically) extremely secure - many orders of
+magnitude better than DES - if sufficiently long keys are used.  I don't
+guarantee the security - I didn't develop the algorithm, so use it at your own
+risk.  That said, the only real risk is that you will delete the original file,
+and forget the key.  If you do, good luck, because I won't be able to help.
+
+Encrypted files have a short header added, so they will be a few bytes larger
+than the original.  There are no restrictions on the type of file - both text
+and binary are supported, and both HPFS long filenames and FAT 8.3 filenames
+can be used.  This version is fully 32-bit, optimised for 486 processors or
+better, and will therefore only run on OS/2 2.0, 2.1, Warp or above.
+
+Version 1.61 also includes 32-bit Windows executables, so it requires Windows
+NT or Windows 95.
+
+Unlike some other Blowfish-based encryption utilities, this one has a higher
+level of security in the form of "block chaining".  In simple terms, this
+means that if the same piece of text appears more than once in a file, it will
+be encrypted into a different ciphertext each time.  You can test this by
+encrypting a file with highly repetitive content.  Say, a text file with the
+expression "Hello world" written over and over.  Other utilities which just
+make a single pass will leave a definite pattern in the encrypted file.  This
+one will not.  This chaining process makes it virtually impossible to decode
+the encrypted file by comparing the plaintext to the ciphertext.
+
+The encryption speed is also pretty good.  Currently, it encrypts files at over
+290 KBytes/sec (60Mhz Pentium), or 225 KBytes/sec (486-DX2/66).  Your mileage
+may vary, but this is fairly ordinary hardware - IDE drive, HPFS formatted,
+standard cache.
+
+Because encryption is a potentially destructive process, I have endeavoured to
+make this programme as robust as possible.  For example:
+
+ - Replacement of a file during encryption is done by writing to a temporary
+   file, and then replacing the original only if no errors occurred.  Any
+   error will leave the original file intact.  If there is insufficient space
+   on the drive to create the target file, the encryption will not proceed.
+
+ - The programme includes a signal handler, so a ctrl-break during execution
+   is handled correctly - the programme terminates cleanly, temporary files
+   are deleted and the source file is left untouched.
+
+ - The header added to the encrypted file contains a hash value based on the
+   original key.  Before an encrypted file is decrypted, the supplied key is
+   hashed, and compared to the stored hash value.  If they do not match, the
+   decryption is aborted. This prevents you from decrypting with the wrong key
+   and ending up with complete garbage.  This does not compromise the security,
+   since any number of keys could hash to the same value, so the real key
+   cannnot be reverse-engineered from the hash value.  For those of you who
+   are interested, the odds of picking a wrong key which hashes to the right
+   value are 1-in-10,007.
+
+ - File date, time and attributes are preserved.  The encrypted file will have
+   the same timestamp and attributes as the original.  BLOWFISH also works
+   on hidden, system or read-only files.
+
+Planned enhancements include:
+
+ - Maintain EA's on files - currently they are stripped off during encryption.
+
+ - Include a DOS or family mode version, for compatibilty.
+
+ - Enhance the interface to ENCRYPT.DLL to allow calling from REXX.
+
+Other files in this package:
+
+ - BLOWFISH.DOC
+   This file.
+
+ - RELEASE.LOG
+   History of development and changes.
+
+ - XXX.TXT
+   Try encrypting this file with this version of BLOWFISH, and compare the
+   results with using any other one.  This should demonstrate the value of
+   block chaining.
+
+ - BF.EXE
+   Statically-linked version of BLOWFISH.EXE.  This does not require ENCRYPT.DLL,
+   so it is easier to install.  Just put it somewhere in your PATH.
+
+ - BFW.EXE
+   32-bit Windows version of BF.EXE, for use on Windows NT or Windows 95.
+
+Further information, including Bruce Schneier's original source and
+documentation is available at (among other places):
+
+   ftp://ftp.ox.ac.uk/pub/crypto/misc/
+
+Also see the Blowfish page at Counterpane Systems:
+
+   http://www.counterpane.com/blowfish.html
+
+ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+Programming Interface.
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+
+For the programmers out there, you can add encryption (and now compression)
+to your own programmes.  There are several files included to let you do this:
+
+ - ENCRYPT.H
+   Header file for encryption API's.  There are 3 basic functions:  Initialise(),
+   EncryptBlock(), and DecryptBlock().  You call Initialise() once, passing
+   the encryption key, then the other functions to encrypt or decrypt,
+   repectively.  The only limitation is that the length of the data to be
+   encrypted must be at least 8 bytes (and less than 4 GB).
+
+   Version 1.61: you also need to call SetVersion(), BEFORE calling any of
+   the other API's.  The parameter is the version number, as an integer
+   (e.g. pass 161 for compatibilty with version 1.61).  The reason for this
+   is that EncryptBlock() and DecryptBlock() contain version-specific code,
+   for backward-compatibility with versions 1.51 and earlier (which contained
+   a minor bug in the block-chaining algorithm).
+
+   Version 1.62:  I've removed the requirement to call SetVersion (which was
+   a bit tacky), though you still can if you want.  BTW, it's been renamed to
+   SetBfVersion(), due to a clash with a windows library function.
+
+   I have also decided that it's time to expose the block-chaining interface.
+   But first a quick description of the ECB (Electronic Code Book) and CBC
+   (Cipher Block Chaining) modes, and how they are used here:
+
+   ECB is the simplest mode for a block cipher such as Blowfish.  You just
+   go through the file 8 bytes (1 block) at a time, and encrypt.  Very early
+   versions of BF (prior to 1.20) used this mode.  The main problem with this
+   mode is that the same plaintext gets encrypted to the same ciphertext every
+   time, irrespective of its position in the file.  Therefore, if you have a
+   file with a lot of repetitive data (as many application-generated files
+   are), it is more susceptible to being decoded.  A file which is completely
+   repetitive (like XXX.TXT) encrypts to give an output which consists of the
+   same 8 bytes over and over.
+
+   In CBC mode, you still go through the file 8 bytes at a time, but before
+   encrypting any given block, you first combine it with the encrypted output
+   of the previous block.  This injects some "randomness" into the data, and
+   a a consequence, each block encrypts differently to its predecessor, even if
+   the plaintext is exactly the same.  Decryption works in the same manner.
+
+   The obvious question is: "What about the first block?  What is that combined
+   with?"  The not-so-obvious answer is: "It doesn't really matter."  In versions
+   up to 1.61, I used 8 bytes of data which was generated out of the "Initialise"
+   process.  It was independent of the data in the file, but unique for, and
+   dependent on, the key.  This seemed reasonable to me, since you then need to
+   have the key to work out this first "seed" (more correctly known as the
+   Initialisation Vector, or IV).  And if you have the key, then you can decrypt
+   the file anyway.
+
+   The downside of this approach is that there is a (phenomenally obscure) link
+   between the key and the first block of encrypted data, which actually weakens
+   the whole encryption process (by an infinitessimal amount).  The alternate way
+   to do this is to use a well-known block of data (like all 0's) as the IV, or 
+   something like a timestamp, which is then stored with the file so it can be 
+   decrypted.
+
+   This is the approach I have taken with version 1.62.  The sharp-eyed among you
+   will notice that the encrypted file is now 8 bytes longer than before: the extra
+   bytes being a pseudo-random value, based on the current time (within 1 second).
+   What is nice about this approach is that two copies of the same file, encrypted
+   with the same key, at different times, will be completely different.
+
+   The last thing to be aware of is what I have called "chaining mode".  That is,
+   what do we use for an IV when we repeatedly call EncryptBlock() and DecryptBlock()?
+   For example, in BF.EXE I read the input file in 64k chunks, encrypt each and write
+   it out.  What I want to do is use the last encrypted block (8 bytes) of the previous
+   chunk (64k) as the IV for the next 64k chunk.  I call this mode "CarryForward",
+   and it is the default mode.
+
+   In the sample programs however, I don't want to preserve the IV between calls,
+   otherwise the decrypted text will be garbage (only the first 8 bytes - you can check
+   this for yourself by changing the chaining mode).  This mode is called "ReInitialise".
+   Rather than trying to work out which mode I should be in (as was done in 1.61), I have
+   put the onus back on the programmer (that's you) to specify what behaviour is wanted.
+
+   So, on to the revised interface. There are a few new functions in the header.
+   Hopefully the above rant will have put them into perspective.  For completeness
+   I'll list them all here:
+
+   Initialise      : Must be called with the key and key length, one time only.
+   EncryptBlock    : Encrypt a block, using the previously passed key.
+   DecryptBlock    : Decrypt a block, using the previously passed key.
+   SetBfVersion    : Set the BF version assumed by the encryption routines.
+   GetBfVersion    : Reports the version really being used.
+   SetChainingMode : There are 2 modes: ReInitialise and CarryForward (see above).
+   SetChainingSeed : Allows setting the IV.  It must be unsigned char[8].
+   GetRandomBlock  : Will generate a pseudo-random IV for you (see SAMPLE2.C).
+
+   Also new with version 1.62:  I've included the Compress/Decompress functions in
+   the DLL, so you can use them too.  See ENCRYPT.H and SAMPLE2.C for usage.
+
+ - SAMPLE.C
+   Sample which demonstrates using the API.  Very simple and self-explanatory.
+
+ - SAMPLE2.C
+   Same as SAMPLE.C, but uses the _System linkage interface, which is required
+   for Borland C++.  Also illustrates the use of a random chaining seed, and
+   data compression.
+
+ - SAMPLE.EXE
+   Compiled version of SAMPLE.C.  Shows how comprehensively the encryption
+   works.
+
+ - SAMPLE2.EXE
+   Compiled version of SAMPLE2.C.  Notice that the text encrypts differently
+   every time you run it.  Cool, huh?
+
+ - ENCRYPT.LIB
+   Import Library for ENCRYPT.DLL.  Link with this to use the functions in
+   the DLL.
+
+ - ENCRYPT.OBJ
+   Object file with the encryption functions.  Link with this to build a
+   stand-alone executable which does not require ENCRYPT.DLL.
+
+ - ENCRYPTW.OBJ
+   32-bit Windows version of ENCRYPT.OBJ.
+
+ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+Key Permutations.
+ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+
+As an aside, the total possible number of keys is calculated as
+(2^8 + 2^16 + ... + 2^448), which is:
+
+729,689,072,234,021,035,218,144,685,565,996,708,998,165,444,454,719,307,576,
+711,729,373,504,540,223,646,542,633,352,584,245,974,403,072,765,511,887,075,
+064,905,822,972,615,393,536
+
+A brute-force approach to finding the key, trying say 1,000,000,000 keys per
+second, would take on average:
+
+11,561,225,698,944,486,196,956,433,403,775,900,401,142,124,946,997,225,827,
+957,635,076,392,129,633,173,095,270,764,452,687,244,505,334,258,079,066,327,
+525,935.2 years.
+
+By way of comparison, the 56 bit DES key has 72,057,594,037,927,936 possible
+combinations.  At the same rate, this would take 417 days to crack.
+
+ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ

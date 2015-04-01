@@ -1,0 +1,27 @@
+            Archive Name: RXBF_102.ZIP
+       Short Description: rxBlFish ver 1.02: A rexx interface to blowfish
+        Long Description:epm
+   BlowFish is a very powerful encryption tool.  RxBlFish provides 
+   an OS/2 REXX interfact to BlowFish -- with RxBlFish, you can
+   use REXX to encrypt strings and files. 
+      Proposed directory
+           for placement:  /pub/os2/util/encrypt
+
+               Your name:  Daniel Hellerstein   
+           Email address:  danielh@crosslink.net
+    Program contact name: (same)
+   Program contact email: (same)
+             Program URL: http://www.srehttp.org/apps/rxbf/
+
+      Would you like the
+   contact email address
+    included in listings? yes
+
+Operating System/Version: OS/2 3.0
+ Additional requirements: Blowfish ver 1.63 (BFISH163.ZIP on hobbes)
+
+                Replaces: RXBF.ZIP -- This is a major bug fix
+
+
+
+
